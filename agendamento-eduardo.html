@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agende com Eduardo — Ademicon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#132038;
+    --ink-soft:#3C4C68;
+    --paper:#E9EDF2;
+    --card:#FFFFFF;
+    --gold:#B08D3E;
+    --gold-soft:#DCC98F;
+    --green:#2F5D50;
+    --line:#D3DAE3;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .wrap{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:0 0 64px;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Fraunces',serif;}
+
+  /* HERO */
+  .hero{
+    padding:48px 24px 40px;
+    max-width:760px;
+    margin:0 auto;
+    text-align:left;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;height:1px;
+    background:var(--gold);
+    display:inline-block;
+  }
+  .hero h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(30px,5vw,44px);
+    line-height:1.08;
+    margin:16px 0 12px;
+  }
+  .hero h1 em{
+    font-style:italic;
+    font-weight:500;
+    color:var(--ink-soft);
+  }
+  .hero p{
+    font-size:16px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    max-width:52ch;
+    margin:0 0 18px;
+  }
+  .hero-meta{
+    display:flex;
+    gap:22px;
+    flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+    padding-top:16px;
+    margin-top:8px;
+  }
+  .hero-meta strong{color:var(--ink);}
+
+  /* MAIN CARD */
+  .panel{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    padding:28px;
+    box-shadow:0 1px 2px rgba(19,32,56,.03);
+  }
+  .step-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .step-num{
+    width:20px;height:20px;
+    border-radius:50%;
+    background:var(--ink);
+    color:var(--paper);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+  }
+
+  /* DATE STRIP — index-card / ledger tabs */
+  .date-strip{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding:4px 2px 14px;
+    scrollbar-width:thin;
+  }
+  .date-strip::-webkit-scrollbar{height:6px;}
+  .date-strip::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+  .date-card{
+    flex:0 0 auto;
+    width:64px;
+    padding:12px 0 10px;
+    text-align:center;
+    border-radius:10px 10px 4px 4px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    cursor:pointer;
+    position:relative;
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .date-card::before{
+    content:"";
+    position:absolute;
+    top:0;left:10px;right:10px;
+    height:1px;
+    border-top:1px dashed var(--gold-soft);
+  }
+  .date-card:hover{transform:translateY(-2px);}
+  .date-card .dow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    letter-spacing:.06em;
+  }
+  .date-card .day{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:22px;
+    margin-top:2px;
+  }
+  .date-card .mon{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .date-card.today{border-color:var(--gold);}
+  .date-card.selected{
+    background:var(--ink);
+    border-color:var(--ink);
+  }
+  .date-card.selected .dow, .date-card.selected .mon{color:var(--gold-soft);}
+  .date-card.selected .day{color:#fff;}
+  .date-card:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+  /* TIME GRID */
+  .time-section{margin-top:22px; display:none;}
+  .time-section.active{display:block;}
+  .time-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+    gap:8px;
+  }
+  .time-slot{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13.5px;
+    padding:10px 6px;
+    text-align:center;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .time-slot:hover{border-color:var(--ink-soft);}
+  .time-slot.selected{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600;}
+  .time-slot.taken{
+    opacity:.4;
+    text-decoration:line-through;
+    cursor:not-allowed;
+    background:transparent;
+  }
+  .time-slot:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .empty-note{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    padding:10px 0;
+  }
+
+  /* FORM */
+  .form-section{margin-top:24px; display:none;}
+  .form-section.active{display:block;}
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .field input{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .field input:focus-visible{outline:2px solid var(--gold); outline-offset:1px;}
+  .summary-line{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    margin:0 0 18px;
+    padding:10px 12px;
+    background:var(--paper);
+    border-radius:8px;
+    border:1px solid var(--line);
+  }
+  .summary-line strong{color:var(--ink);}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:13px 22px;
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    transition:background .15s ease, transform .15s ease;
+  }
+  .btn:hover{background:#0C1729;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+  }
+  .btn-ghost:hover{background:var(--paper); color: var(--ink);}
+  .error-msg{
+    color:#A23B3B;
+    font-size:13px;
+    margin-top:-6px;
+    margin-bottom:12px;
+    display:none;
+  }
+  .error-msg.active{display:block;}
+
+  /* CONFIRMATION */
+  .confirm{display:none; text-align:center; padding:12px 4px 4px;}
+  .confirm.active{display:block;}
+  .seal{
+    width:56px;height:56px;
+    border-radius:50%;
+    background:var(--green);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 16px;
+    font-size:26px;
+    animation:stampIn .4s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes stampIn{
+    0%{transform:scale(0) rotate(-14deg); opacity:0;}
+    100%{transform:scale(1) rotate(0deg); opacity:1;}
+  }
+  .confirm h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0 0 8px;
+  }
+  .confirm p{color:var(--ink-soft); font-size:14.5px; line-height:1.6; margin:0 0 20px;}
+  .confirm-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+
+  .loading-note{font-size:13.5px; color:var(--ink-soft); padding:8px 0;}
+
+  footer{
+    max-width:760px;
+    margin:28px auto 0;
+    padding:0 24px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    opacity:.75;
+  }
+
+  @media (max-width:520px){
+    .hero{padding:32px 18px 28px;}
+    .panel{padding:0 18px;}
+    .card{padding:20px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Consultoria de crédito · Ademicon</div>
+    <h1>Vamos falar sobre o<br><em>seu próximo passo.</em></h1>
+    <p>Reserve um horário direto na agenda do Eduardo. Escolha o dia, o horário e confirme — o convite segue pronto para o WhatsApp dele.</p>
+    <div class="hero-meta">
+      <span>Atendimento: <strong>todos os dias</strong></span>
+      <span>Horário: <strong>8h às 22h</strong></span>
+      <span>Duração: <strong>1 hora</strong></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="card">
+
+      <div id="bookingFlow">
+        <p class="step-label"><span class="step-num">1</span> Escolha o dia</p>
+        <div class="date-strip" id="dateStrip"></div>
+
+        <div class="time-section" id="timeSection">
+          <p class="step-label"><span class="step-num">2</span> Escolha o horário</p>
+          <div id="timeLoading" class="loading-note">Carregando horários disponíveis…</div>
+          <div class="time-grid" id="timeGrid"></div>
+          <p class="empty-note" id="emptyNote" style="display:none;">Nenhum horário livre neste dia — tente outra data.</p>
+        </div>
+
+        <div class="form-section" id="formSection">
+          <p class="step-label"><span class="step-num">3</span> Seus dados</p>
+          <p class="summary-line" id="summaryLine"></p>
+          <div class="field">
+            <label for="nameInput">Nome completo</label>
+            <input type="text" id="nameInput" placeholder="Como podemos te chamar?">
+          </div>
+          <div class="field">
+            <label for="phoneInput">WhatsApp para contato</label>
+            <input type="tel" id="phoneInput" placeholder="(43) 9 9999-9999">
+          </div>
+          <p class="error-msg" id="errorMsg">Preencha nome e WhatsApp para continuar.</p>
+          <button class="btn" id="confirmBtn">Confirmar agendamento →</button>
+        </div>
+      </div>
+
+      <div class="confirm" id="confirmSection">
+        <div class="seal">✓</div>
+        <h2>Horário reservado!</h2>
+        <p id="confirmText"></p>
+        <div class="confirm-actions">
+          <a class="btn" id="whatsappLink" href="#" target="_blank" rel="noopener">Abrir WhatsApp e confirmar</a>
+          <button class="btn btn-ghost" id="resetBtn">Fazer outro agendamento</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>Ademicon — Eduardo, consultor de crédito. Os horários mostrados são atualizados em tempo real.</footer>
+</div>
+
+<script>
+(function(){
+  const EDUARDO_PHONE = "5543984010196";
+  const START_HOUR = 8;
+  const END_HOUR = 22; // last meeting starts at 21:00, ends 22:00
+  const DAYS_AHEAD = 30;
+  const WEEKDAYS = ["dom","seg","ter","qua","qui","sex","sáb"];
+  const MONTHS = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+  let bookingsCache = null;
+  let selectedDateKey = null;
+  let selectedTime = null;
+
+  const dateStrip = document.getElementById('dateStrip');
+  const timeSection = document.getElementById('timeSection');
+  const timeGrid = document.getElementById('timeGrid');
+  const timeLoading = document.getElementById('timeLoading');
+  const emptyNote = document.getElementById('emptyNote');
+  const formSection = document.getElementById('formSection');
+  const summaryLine = document.getElementById('summaryLine');
+  const nameInput = document.getElementById('nameInput');
+  const phoneInput = document.getElementById('phoneInput');
+  const errorMsg = document.getElementById('errorMsg');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const bookingFlow = document.getElementById('bookingFlow');
+  const confirmSection = document.getElementById('confirmSection');
+  const confirmText = document.getElementById('confirmText');
+  const whatsappLink = document.getElementById('whatsappLink');
+  const resetBtn = document.getElementById('resetBtn');
+
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+  function dateKey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+
+  function buildDateStrip(){
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    for(let i=0; i<DAYS_AHEAD; i++){
+      const d = new Date(today);
+      d.setDate(d.getDate()+i);
+      const key = dateKey(d);
+      const card = document.createElement('div');
+      card.className = 'date-card' + (i===0 ? ' today' : '');
+      card.tabIndex = 0;
+      card.setAttribute('role','button');
+      card.dataset.key = key;
+      card.innerHTML = `<div class="dow">${WEEKDAYS[d.getDay()]}</div><div class="day">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]}</div>`;
+      card.addEventListener('click', () => selectDate(key, d, card));
+      card.addEventListener('keydown', (e) => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectDate(key, d, card);} });
+      dateStrip.appendChild(card);
+    }
+  }
+
+  const STORAGE_KEY = 'eduardo_agendamentos';
+
+  async function loadBookings(){
+    if(bookingsCache) return bookingsCache;
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      bookingsCache = raw ? JSON.parse(raw) : {};
+    }catch(e){
+      bookingsCache = {};
+    }
+    return bookingsCache;
+  }
+
+  async function saveBooking(dateKeyStr, time, details){
+    const data = await loadBookings();
+    if(!data[dateKeyStr]) data[dateKeyStr] = {};
+    data[dateKeyStr][time] = details;
+    bookingsCache = data;
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  async function selectDate(key, dateObj, cardEl){
+    document.querySelectorAll('.date-card').forEach(c => c.classList.remove('selected'));
+    cardEl.classList.add('selected');
+    selectedDateKey = key;
+    selectedTime = null;
+    timeSection.classList.add('active');
+    formSection.classList.remove('active');
+    timeGrid.innerHTML = '';
+    emptyNote.style.display = 'none';
+    timeLoading.style.display = 'block';
+
+    const data = await loadBookings();
+    timeLoading.style.display = 'none';
+    const taken = data[key] || {};
+
+    const now = new Date();
+    const isToday = dateKey(now) === key;
+    let anyAvailable = false;
+
+    for(let h = START_HOUR; h < END_HOUR; h++){
+      const label = pad(h) + ':00';
+      const isPast = isToday && h <= now.getHours();
+      const isTaken = !!taken[label];
+      const slot = document.createElement('div');
+      slot.className = 'time-slot' + (isTaken || isPast ? ' taken' : '');
+      slot.textContent = label;
+      slot.tabIndex = (isTaken || isPast) ? -1 : 0;
+      if(!isTaken && !isPast){
+        anyAvailable = true;
+        slot.addEventListener('click', () => selectTime(label, slot));
+        slot.addEventListener('keydown', (e) => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectTime(label, slot);} });
+      }
+      timeGrid.appendChild(slot);
+    }
+
+    emptyNote.style.display = anyAvailable ? 'none' : 'block';
+  }
+
+  function selectTime(label, slotEl){
+    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+    slotEl.classList.add('selected');
+    selectedTime = label;
+    formSection.classList.add('active');
+
+    const [y,m,dd] = selectedDateKey.split('-').map(Number);
+    const d = new Date(y, m-1, dd);
+    const niceDate = `${WEEKDAYS[d.getDay()]}, ${d.getDate()} de ${['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][d.getMonth()]}`;
+    summaryLine.innerHTML = `Reunião em <strong>${niceDate}</strong> às <strong>${label}</strong> · duração de 1 hora`;
+    formSection.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  confirmBtn.addEventListener('click', async () => {
+    const name = nameInput.value.trim();
+    const phone = phoneInput.value.trim();
+    if(!name || !phone){
+      errorMsg.classList.add('active');
+      return;
+    }
+    errorMsg.classList.remove('active');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Confirmando…';
+
+    const [y,m,dd] = selectedDateKey.split('-').map(Number);
+    const d = new Date(y, m-1, dd);
+    const niceDate = `${dd}/${pad(m)}/${y}`;
+
+    await saveBooking(selectedDateKey, selectedTime, { nome: name, telefone: phone });
+
+    const msg = `Olá Eduardo! Meu nome é ${name}. Gostaria de confirmar nossa reunião agendada para ${niceDate} às ${selectedTime}. Meu WhatsApp: ${phone}.`;
+    const link = `https://wa.me/${EDUARDO_PHONE}?text=${encodeURIComponent(msg)}`;
+    whatsappLink.href = link;
+
+    confirmText.textContent = `${niceDate} às ${selectedTime} — para finalizar, toque em "Abrir WhatsApp" e envie a mensagem já pronta para o Eduardo.`;
+    bookingFlow.style.display = 'none';
+    confirmSection.classList.add('active');
+
+    window.open(link, '_blank');
+
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Confirmar agendamento →';
+  });
+
+  resetBtn.addEventListener('click', () => {
+    bookingFlow.style.display = 'block';
+    confirmSection.classList.remove('active');
+    timeSection.classList.remove('active');
+    formSection.classList.remove('active');
+    document.querySelectorAll('.date-card').forEach(c => c.classList.remove('selected'));
+    nameInput.value = '';
+    phoneInput.value = '';
+    selectedDateKey = null;
+    selectedTime = null;
+    bookingsCache = null;
+  });
+
+  buildDateStrip();
+})();
+</script>
+</body>
+</html>
